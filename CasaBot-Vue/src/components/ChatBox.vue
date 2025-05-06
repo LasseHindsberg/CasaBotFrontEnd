@@ -1,22 +1,41 @@
 <script setup>
 import { ref, watch, nextTick } from 'vue'
 
+// Use Vite env variables
+const fastApiUrl = import.meta.env.VITE_FASTAPI_URL
+const fastApiKey = import.meta.env.VITE_FASTAPI_KEY
+
 const input = ref('')
 const messages = ref([])
 const chatWindow = ref(null)
 
 const sendMessage = async () => {
-  if (!input.value.trim()) return
+  const userInput = input.value.trim()
+  if (!userInput) return
 
   // Add user's message
-  messages.value.push({ text: input.value, sender: 'user' })
-
-  // Simulate API delay
-  setTimeout(() => {
-    messages.value.push({ text: 'This is a mock reply from the bot.', sender: 'bot' })
-  }, 500)
-
+  messages.value.push({ text: userInput, sender: 'user' })
   input.value = ''
+
+  try {
+    const response = await fetch(`${fastApiUrl}chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        /*'Authorization': `Bearer ${fastApiKey}`*/
+      },
+      body: JSON.stringify({ prompt: userInput })
+    })
+
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`)
+
+    const data = await response.json()
+
+    messages.value.push({ text: data.response, sender: 'bot' })
+  } catch (error) {
+    messages.value.push({ text: 'Error: Unable to reach chatbot API.', sender: 'bot' })
+    console.error(error)
+  }
 }
 
 // Auto-scroll when messages change
