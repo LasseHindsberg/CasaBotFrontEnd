@@ -71,7 +71,7 @@ watch(
 
     <div
       ref="chatWindow"
-      class="w-full max-w-2xl h-[400px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
+      class="w-full max-w-2xl h-[780px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
     >
       <div
         v-for="(msg, index) in messages"
