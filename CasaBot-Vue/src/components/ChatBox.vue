@@ -31,7 +31,21 @@ const sendMessage = async () => {
 
     const data = await response.json()
 
-    messages.value.push({ text: data.response, sender: 'bot' })
+    let botText = ''
+const fullText = data.response
+const typingDelay = 10 // ms per character
+
+const typeChar = () => {
+  if (botText.length < fullText.length) {
+    botText += fullText[botText.length]
+    messages.value[messages.value.length - 1].text = botText
+    setTimeout(typeChar, typingDelay)
+  }
+}
+
+messages.value.push({ text: '', sender: 'bot' }) // add bot placeholder
+typeChar()
+
   } catch (error) {
     messages.value.push({ text: 'Error: Unable to reach chatbot API.', sender: 'bot' })
     console.error(error)
@@ -52,90 +66,44 @@ watch(
 </script>
 
 <template>
-  <div class="chat-container">
-    <h1>Chat</h1>
-    <div class="chat-window" ref="chatWindow">
+  <div class="min-h-screen bg-gray-950 text-white font-inter px-4 py-6 flex flex-col items-center">
+    <h1 class="text-3xl font-semibold mb-4">Chat</h1>
+
+    <div
+      ref="chatWindow"
+      class="w-full max-w-2xl h-[400px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
+    >
       <div
         v-for="(msg, index) in messages"
         :key="index"
-        :class="['chat-bubble', msg.sender === 'user' ? 'right' : 'left']"
+        :class="[
+          'max-w-[70%] px-4 py-2 rounded-lg whitespace-pre-wrap leading-relaxed',
+          msg.sender === 'user'
+            ? 'bg-blue-600 self-end text-right animate-fade-in'
+            : 'bg-gray-700 self-start text-left animate-fade-in'
+        ]"
       >
         {{ msg.text }}
       </div>
     </div>
-    <form class="input-form" @submit.prevent="sendMessage">
-      <input v-model="input" placeholder="Type a message..." />
-      <button type="submit">Send</button>
+
+    <form
+      @submit.prevent="sendMessage"
+      class="flex w-full max-w-2xl gap-2"
+    >
+      <input
+        v-model="input"
+        placeholder="Type a message..."
+        class="flex-1 px-4 py-2 rounded-md bg-black border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        type="submit"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition rounded-md text-white font-medium"
+      >
+        Send
+      </button>
     </form>
   </div>
 </template>
-
 <style scoped>
-.chat-container {
-
-  background: #111;
-  color: white;
-  height: 100vh;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.chat-window {
-  width: 100%;
-  max-width: 600px;
-  height: 400px;
-  overflow-y: auto;
-  background: #222;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-bubble {
-  max-width: 70%;
-  padding: 0.8rem;
-  border-radius: 10px;
-  margin: 0.5rem 0;
-  line-height: 1.4;
-}
-
-.left {
-  background-color: #444;
-  align-self: flex-start;
-  text-align: left;
-}
-
-.right {
-  background-color: #1e90ff;
-  align-self: flex-end;
-  text-align: right;
-}
-
-.input-form {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-  max-width: 600px;
-}
-
-input {
-  flex: 1;
-  padding: 0.6rem;
-  border-radius: 6px;
-  border: none;
-  background: #000;
-  color: white;
-}
-
-button {
-  padding: 0.6rem 1rem;
-  background: #ccc;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
 </style>
