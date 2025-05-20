@@ -1,7 +1,7 @@
 <script setup>
 import { ref, watch, nextTick } from 'vue'
+import FaqOptions from './FaqOptions.Vue'
 
-// Use Vite env variables
 const fastApiUrl = import.meta.env.VITE_FASTAPI_URL
 const fastApiKey = import.meta.env.VITE_FASTAPI_KEY
 
@@ -22,7 +22,6 @@ const sendMessage = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        /*'Authorization': `Bearer ${fastApiKey}`*/
       },
       body: JSON.stringify({ prompt: userInput })
     })
@@ -32,24 +31,29 @@ const sendMessage = async () => {
     const data = await response.json()
 
     let botText = ''
-const fullText = data.response
-const typingDelay = 10 // ms per character
+    const fullText = data.response
+    const typingDelay = 10 // ms per character
 
-const typeChar = () => {
-  if (botText.length < fullText.length) {
-    botText += fullText[botText.length]
-    messages.value[messages.value.length - 1].text = botText
-    setTimeout(typeChar, typingDelay)
-  }
-}
+    const typeChar = () => {
+      if (botText.length < fullText.length) {
+        botText += fullText[botText.length]
+        messages.value[messages.value.length - 1].text = botText
+        setTimeout(typeChar, typingDelay)
+      }
+    }
 
-messages.value.push({ text: '', sender: 'bot' }) // add bot placeholder
-typeChar()
+    messages.value.push({ text: '', sender: 'bot' }) 
+    typeChar()
 
   } catch (error) {
     messages.value.push({ text: 'Error: Unable to reach chatbot API.', sender: 'bot' })
     console.error(error)
   }
+}
+
+const handleFaqSelect = (question) => {
+  input.value = question
+  sendMessage()
 }
 
 // Auto-scroll when messages change
@@ -69,9 +73,14 @@ watch(
   <div class="min-h-screen bg-gray-950 text-white font-inter px-4 py-6 flex flex-col items-center">
     <h1 class="text-3xl font-semibold mb-4">Chat</h1>
 
+    <!-- FAQ Options -->
+    <h3 class="text-lg font-semibold mb-2">Frequently Asked Questions</h3>
+    <FaqOptions @selectFaq="handleFaqSelect" />
+
+    <!-- Chat Window -->
     <div
       ref="chatWindow"
-      class="w-full max-w-2xl h-[780px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
+      class="w-full max-w-2xl h-[450px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
     >
       <div
         v-for="(msg, index) in messages"
@@ -87,10 +96,8 @@ watch(
       </div>
     </div>
 
-    <form
-      @submit.prevent="sendMessage"
-      class="flex w-full max-w-2xl gap-2"
-    >
+    <!-- Input Form -->
+    <form @submit.prevent="sendMessage" class="flex w-full max-w-2xl gap-2">
       <input
         v-model="input"
         placeholder="Type a message..."
@@ -105,5 +112,6 @@ watch(
     </form>
   </div>
 </template>
+
 <style scoped>
 </style>
