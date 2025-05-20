@@ -8,14 +8,18 @@ const fastApiKey = import.meta.env.VITE_FASTAPI_KEY
 const input = ref('')
 const messages = ref([])
 const chatWindow = ref(null)
+const loading = ref(false) // Loading state
 
 const sendMessage = async () => {
+  if (loading.value) return // Prevent sending if already loading
+
   const userInput = input.value.trim()
   if (!userInput) return
 
   // Add user's message
   messages.value.push({ text: userInput, sender: 'user' })
   input.value = ''
+  loading.value = true // Start loading
 
   try {
     const response = await fetch(`${fastApiUrl}chat`, {
@@ -39,6 +43,8 @@ const sendMessage = async () => {
         botText += fullText[botText.length]
         messages.value[messages.value.length - 1].text = botText
         setTimeout(typeChar, typingDelay)
+      } else {
+        loading.value = false // Stop loading after typing is done
       }
     }
 
@@ -47,11 +53,13 @@ const sendMessage = async () => {
 
   } catch (error) {
     messages.value.push({ text: 'Error: Unable to reach chatbot API.', sender: 'bot' })
+    loading.value = false // Stop loading on error
     console.error(error)
   }
 }
 
 const handleFaqSelect = (question) => {
+  if (loading.value) return // Prevent FAQ selection while loading
   input.value = question
   sendMessage()
 }
@@ -80,7 +88,7 @@ watch(
     <!-- Chat Window -->
     <div
       ref="chatWindow"
-      class="w-full max-w-2xl h-[450px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
+      class="w-full max-w-5xl h-[450px] overflow-y-auto bg-gray-900 p-4 rounded-xl flex flex-col gap-2 mb-4 shadow-inner"
     >
       <div
         v-for="(msg, index) in messages"
@@ -94,18 +102,24 @@ watch(
       >
         {{ msg.text }}
       </div>
+      <!-- Loading indicator -->
+      <div v-if="loading" class="self-start text-gray-400 px-4 py-2 animate-pulse">
+        Bot is typing...
+      </div>
     </div>
 
     <!-- Input Form -->
-    <form @submit.prevent="sendMessage" class="flex w-full max-w-2xl gap-2">
+    <form @submit.prevent="sendMessage" class="flex w-full max-w-5xl gap-2">
       <input
         v-model="input"
+        :disabled="loading"
         placeholder="Type a message..."
         class="flex-1 px-4 py-2 rounded-md bg-black border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
         type="submit"
-        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition rounded-md text-white font-medium"
+        :disabled="loading"
+        class="px-4 py-2 bg-blue-500 hover:bg-blue-600 transition rounded-md text-white font-medium disabled:opacity-50"
       >
         Send
       </button>
