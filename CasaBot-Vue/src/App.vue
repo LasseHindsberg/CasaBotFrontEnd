@@ -1,10 +1,12 @@
 <script setup>
 // import HelloWorld from './components/HelloWorld.vue'
 import ChatBox from './components/ChatBox.vue'
+import Contact from './components/Contact.vue'
 </script>
 
 <template>
   <ChatBox/>
+  <Contact/>
 </template>
 
 <style scoped>
