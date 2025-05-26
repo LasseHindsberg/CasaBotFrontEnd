@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, nextTick } from 'vue'
-import FaqOptions from './FaqOptions.Vue'
+import FaqOptions from './FaqOptions.vue'
 
 const fastApiUrl = import.meta.env.VITE_FASTAPI_URL
 const fastApiKey = import.meta.env.VITE_FASTAPI_KEY
