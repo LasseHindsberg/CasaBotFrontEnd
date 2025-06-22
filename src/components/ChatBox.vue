@@ -3,8 +3,7 @@ import { ref, watch, nextTick } from 'vue'
 import FaqOptions from './FaqOptions.vue'
 
 const fastApiUrl = import.meta.env.VITE_FASTAPI_URL
-const fastApiKey = import.meta.env.VITE_FASTAPI_KEY
-
+console.log('fastApiUrl:', fastApiUrl);
 const input = ref('')
 const messages = ref([])
 const chatWindow = ref(null)
@@ -20,7 +19,7 @@ const sendMessage = async () => {
   messages.value.push({ text: userInput, sender: 'user' })
   input.value = ''
   loading.value = true // Start loading
-
+  
   try {
     const response = await fetch(`${fastApiUrl}chat`, {
       method: 'POST',
